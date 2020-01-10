@@ -4,71 +4,59 @@ export const GET_ONIBIES_REQUEST = 'GET_ONIBIES_REQUEST';
 export const GET_ONIBIES_SUCCESS = 'GET_ONIBIES_SUCCESS';
 export const GET_ONIBIES_FAIL = 'GET_ONIBIES_FAIL';
 
-const cached = false;
 
-let lastExec = new Date().getTime();
+export const GET_ONIBIE_INSTANCE_REQUEST = 'GET_ONIBIE_INSTANCE_REQUEST';
+export const GET_ONIBIE_INSTANCE_SUCCESS = 'GET_ONIBIE_INSTANCE_SUCCESS';
+export const GET_ONIBIE_INSTANCE_FAIL = 'GET_ONIBIE_INSTANCE_FAIL';
 
-function pauseBrowser(millis) {
-  let date = Date.now();
-  let curDate = null;
-  do {
-    curDate = Date.now();
-  } while (curDate - date < millis);
-}
-
-function getOnibiInstance(element, secretKey) {
-  let curDate = new Date().getTime();
-  while (curDate - lastExec < 300) {
-    pauseBrowser(100);
-    curDate = new Date().getTime();
-  }
-
-  lastExec = new Date().getTime();
+const getItemIndex = element => {
   let classId = element.class;
   let instanceId = element.instance;
+  return classId + '_' + instanceId;
+}
 
-  let itemIndex = classId + '_' + instanceId;
+function getOnibiInstanceFromApi(element, secretKey) {
+  let itemIndex = getItemIndex(element);
   let requestStr =
     'https://market.dota2.net/api/ItemInfo/' +
     itemIndex +
     '/ru/?key=' +
     secretKey;
 
-  console.log(requestStr);
-
-  fetch(requestStr)
+  const result = {};
+  return fetch(requestStr)
     .then(response => {
       return response.json();
     })
     .then(data => {
       if (data.description.find(t => t.value === 'Стиль-улучшение 15')) {
-        element.is18 = 1;
+        result.is18 = 1;
       } else {
-        element.is18 = 0;
+        result.is18 = 0;
       }
 
       if (data.description.find(t => t.value === 'Стиль-улучшение 16')) {
-        element.is19 = 1;
+        result.is19 = 1;
       } else {
-        element.is19 = 0;
+        result.is19 = 0;
       }
 
       if (data.description.find(t => t.value === 'Стиль-улучшение 20')) {
-        element.is20 = 1;
+        result.is20 = 1;
       } else {
-        element.is20 = 0;
+        result.is20 = 0;
       }
 
       if (data.description.find(t => t.value === 'Стиль-улучшение 21')) {
-        element.is21 = 1;
+        result.is21 = 1;
       } else {
-        element.is21 = 0;
+        result.is21 = 0;
       }
-      element.isFetching = 0;
+      return result; 
     });
 }
 
-function getOnibiesCache(secretKey, dispatch) {
+function getOnibiesFromApi(secretKey) {
   let requestStr =
     'https://market.dota2.net/api/v2/search-item-by-hash-name?key=' +
     secretKey +
@@ -76,50 +64,59 @@ function getOnibiesCache(secretKey, dispatch) {
   // '&hash_name=Inscribed Onibi';  расширить на эти варианты
   // '&hash_name=Autographed Onibi';
 
-  let i = 0;
   fetch(requestStr)
     .then(response => {
       return response.json();
     })
     .then(data => {
-      console.log('приехали данные ', data);
-      console.log(data.success);
-
-      let dataDump2 = { ...data.data };
-      console.log('datadump2: ', dataDump2);
-
-      data.data.forEach(element => {
-        //if (i < 10) {
-        element.isFetching = 1;
-        getOnibiInstance(element, secretKey);
-        i++;
-        //}
-      });
-
-      let dataDump = data.data.slice(0);
-      console.log('datadump: ', dataDump);
-
-      dispatch({
-        type: GET_ONIBIES_SUCCESS,
-        payload: dataDump
-      });
+      return data.data;
     });
 }
 
-export function getOnibies(secretKey) {
+
+function getOnibiesAction(element, secret) {
+  return dispatch => {
+     dispatch({
+      type: GET_ONIBIE_INSTANCE_REQUEST,
+      payload: { secretKey, element }
+    });
+    
+    getOnibiInstanceFromApi(element, secret).then(data => {
+       dispatch({
+           type: GET_ONIBIE_INSTANCE_SUCCESS,
+           payload: { secretKey, element, data }
+       });
+    });
+  };
+}
+
+
+function getAllInstances(list, secretKey, dispatch) {
+  let pool = [...list];
+  let timer;
+  timer = setInterval(() => {
+    if (pool.length === 0 && timer) {
+      clearInterval(timer);
+    }
+    const tofetch = pool.slice(0, 5);
+    getOnibiesAction.forEach(e => getOnibiesAction(e, secretKey)(dispatch));
+  }, 1*1000);
+}
+
+export function getOnibiesAction(secretKey) {
   return dispatch => {
     dispatch({
       type: GET_ONIBIES_REQUEST,
       payload: secretKey
     });
 
-    if (cached) {
-      dispatch({
+    getOnibiesFromApi(secretKey).then(data => {
+     getAllInstances(data, secretKey, dispatch);
+     dispatch({
         type: GET_ONIBIES_SUCCESS,
-        payload: {}
-      });
-    } else {
-      getOnibiesCache(secretKey, dispatch);
-    }
+        payload: data
+      })
+    });
+
   };
 }
