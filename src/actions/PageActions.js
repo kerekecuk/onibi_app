@@ -37,48 +37,28 @@ function getOnibiInstanceFromApi(element, secretKey) {
 }
 
 function getOnibiesFromApi(secretKey) {
-  let requestStr =
+  let baseRequestStr =
     'https://market.dota2.net/api/v2/search-item-by-hash-name?key=' +
     secretKey +
-    '&hash_name=Onibi';
+    '&hash_name=';
 
-  let requestStr2 =
-    'https://market.dota2.net/api/v2/search-item-by-hash-name?key=' +
-    secretKey +
-    '&hash_name=Inscribed Onibi';
+  let findFor = ['Onibi', 'Inscribed Onibi', 'Autographed Onibi'];
+  let promises = findFor.map(element => {
+    let requestStr = baseRequestStr + element;
 
-  let requestStr3 =
-    'https://market.dota2.net/api/v2/search-item-by-hash-name?key=' +
-    secretKey +
-    '&hash_name=Autographed Onibi';
-
-  let request1 = fetch(requestStr).then(response => {
-    return response.json();
-  });
-  let request2 = fetch(requestStr2).then(response => {
-    return response.json();
-  });
-  let request3 = fetch(requestStr3).then(response => {
-    return response.json();
+    return fetch(requestStr).then(response => {
+      return response.json();
+    });
   });
 
-  return Promise.all([request1, request2, request3]).then(values => {
-    let dataAll = values[0].data.concat(values[1].data.concat(values[2].data));
-    //console.log('dataAll: ', dataAll);
+  return Promise.all(promises).then(values => {
+    let dataAll = [];
+    values.forEach(x => {
+      dataAll = dataAll.concat(x.data);
+    });
+
     return dataAll;
   });
-
-  /* return fetch(requestStr)
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      //let dataStart = [...data.data];
-      //let dataSpliced = dataStart.splice(5);
-
-      //return dataStart;
-      return data.data;
-    }); */
 }
 
 function getOnibiInstanceAction(element, secretKey) {

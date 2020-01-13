@@ -11,7 +11,6 @@ const mapStateToProps = store => {
 class Onibi extends React.Component {
   render() {
     let {
-      id,
       price,
       name,
       link,
