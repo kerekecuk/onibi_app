@@ -120,4 +120,6 @@ export function getOnibiesAction(secretKey) {
   };
 }
 
-export function getOnibiesFiltered(filterKey) {}
+export function getOnibiesFiltered(filterKey, isChecked) {
+  console.log(filterKey, isChecked);
+}
