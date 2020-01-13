@@ -8,6 +8,9 @@ export const GET_ONIBIE_INSTANCE_REQUEST = 'GET_ONIBIE_INSTANCE_REQUEST';
 export const GET_ONIBIE_INSTANCE_SUCCESS = 'GET_ONIBIE_INSTANCE_SUCCESS';
 export const GET_ONIBIE_INSTANCE_FAIL = 'GET_ONIBIE_INSTANCE_FAIL';
 
+let cached = false;
+let dataAllCached = [];
+
 function getOnibiInstanceFromApi(element, secretKey) {
   let itemIndex = getItemIndex(element);
   let requestStr =
@@ -57,6 +60,8 @@ function getOnibiesFromApi(secretKey) {
       dataAll = dataAll.concat(x.data);
     });
 
+    cached = true;
+    dataAllCached = [...dataAll];
     return dataAll;
   });
 }
@@ -98,12 +103,21 @@ export function getOnibiesAction(secretKey) {
       payload: secretKey
     });
 
-    getOnibiesFromApi(secretKey).then(data => {
-      getAllInstances(data, secretKey, dispatch);
+    if (cached) {
       dispatch({
         type: GET_ONIBIES_SUCCESS,
-        payload: data
+        payload: dataAllCached
       });
-    });
+    } else {
+      getOnibiesFromApi(secretKey).then(data => {
+        getAllInstances(data, secretKey, dispatch);
+        dispatch({
+          type: GET_ONIBIES_SUCCESS,
+          payload: data
+        });
+      });
+    }
   };
 }
+
+export function getOnibiesFiltered(filterKey) {}
