@@ -7,6 +7,6 @@ import freeze from 'redux-freeze';
 
 export const store = createStore(
   rootReducer,
-  applyMiddleware(thunk, freeze, logger)
+  applyMiddleware(thunk, freeze /* , logger */)
 );
 //export const store = createStore(rootReducer);

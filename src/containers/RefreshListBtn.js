@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { getOnibies } from '../actions/PageActions';
+import { getOnibiesAction } from '../actions/PageActions';
 
 class RefreshListBtn extends React.Component {
   onClickBtn = () => {
@@ -26,7 +26,7 @@ const mapStateToProps = store => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    getOnibiesAction: secretKey => dispatch(getOnibies(secretKey))
+    getOnibiesAction: secretKey => dispatch(getOnibiesAction(secretKey))
   };
 };
 
