@@ -4,7 +4,7 @@ import { getOnibiesFiltered } from '../actions/PageActions';
 
 class Filter extends React.Component {
   onChangeChBox = e => {
-    this.props.getOnibiesFiltered(this.props.keyNum, e.target.checked);
+    this.props.getOnibiesFilteredAction(this.props.keyNum, e.target.checked);
   };
 
   render() {
@@ -21,12 +21,12 @@ class Filter extends React.Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    getOnibiesFiltered: (keyNum, isChecked) =>
+    getOnibiesFilteredAction: (keyNum, isChecked) =>
       dispatch(getOnibiesFiltered(keyNum, isChecked))
   };
 };
 
-const ConnectedFilter = connect(mapDispatchToProps)(Filter);
+const ConnectedFilter = connect(null, mapDispatchToProps)(Filter);
 
 class Filters extends React.Component {
   render() {

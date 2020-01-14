@@ -1,7 +1,8 @@
 import {
   GET_ONIBIES_REQUEST,
   GET_ONIBIES_SUCCESS,
-  GET_ONIBIES_FAIL
+  GET_ONIBIES_FAIL,
+  GET_FILTERED_CACHED_LIST
 } from '../actions/PageActions';
 import { getItemIndex } from '../utils/onibiTools';
 
@@ -51,6 +52,39 @@ export function pageReducer(state = initialState, action) {
       return {
         ...state,
         [itemIndex]: action.payload.data
+      };
+    }
+
+    case GET_FILTERED_CACHED_LIST: {
+      const data = action.payload.dataAllCached;
+      const filterArray = action.payload.filteredValues;
+      console.log('data: ', data);
+
+      let result = [];
+      if (filterArray && filterArray.length > 0) {
+        result = data.filter(onibi => {
+          let itemIndex = getItemIndex(onibi);
+
+          let isNeed = false;
+
+          filterArray.forEach(element => {
+            let elem = state[itemIndex];
+            if (elem['is' + element]) {
+              isNeed = true;
+            }
+          });
+
+          return isNeed;
+        });
+      } else {
+        result = [...data];
+      }
+
+      return {
+        ...state,
+        onibiData: result,
+        isFetching: false,
+        error: ''
       };
     }
 

@@ -8,6 +8,8 @@ export const GET_ONIBIE_INSTANCE_REQUEST = 'GET_ONIBIE_INSTANCE_REQUEST';
 export const GET_ONIBIE_INSTANCE_SUCCESS = 'GET_ONIBIE_INSTANCE_SUCCESS';
 export const GET_ONIBIE_INSTANCE_FAIL = 'GET_ONIBIE_INSTANCE_FAIL';
 
+export const GET_FILTERED_CACHED_LIST = 'GET_FILTERED_CACHED_LIST';
+
 let cached = false;
 let dataAllCached = [];
 
@@ -120,6 +122,25 @@ export function getOnibiesAction(secretKey) {
   };
 }
 
+let filteredValues = [];
 export function getOnibiesFiltered(filterKey, isChecked) {
   console.log(filterKey, isChecked);
+
+  if (isChecked && !filteredValues.includes(filterKey)) {
+    filteredValues.push(filterKey);
+  }
+
+  if (!isChecked && filteredValues.includes(filterKey)) {
+    let index = filteredValues.indexOf(filterKey);
+    if (index !== -1) filteredValues.splice(index, 1);
+  }
+
+  //console.log('store.getState: ', store.getState());
+
+  return dispatch => {
+    dispatch({
+      type: GET_FILTERED_CACHED_LIST,
+      payload: { dataAllCached, filteredValues }
+    });
+  };
 }

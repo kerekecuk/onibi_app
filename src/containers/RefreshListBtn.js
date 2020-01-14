@@ -1,10 +1,12 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { getOnibiesAction } from '../actions/PageActions';
+//import { consoleLog } from '../utils/testJs';
 
 class RefreshListBtn extends React.Component {
   onClickBtn = () => {
     this.props.getOnibiesAction(this.props.user.secretKey);
+    //consoleLog();
   };
 
   render() {
